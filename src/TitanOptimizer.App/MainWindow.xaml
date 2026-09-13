@@ -124,6 +124,14 @@
 
                     <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,18,0,0">
                         <StackPanel>
+                            <TextBlock Text="Network adapters" FontSize="17" FontWeight="SemiBold" />
+                            <TextBlock Text="Read-only adapter, link, address, and gateway inventory. No network settings are changed." Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,4,0,10" />
+                            <ListBox x:Name="NetworkList" Background="Transparent" BorderThickness="0" Foreground="{StaticResource PrimaryText}" MinHeight="54" MaxHeight="150" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,18,0,0">
+                        <StackPanel>
                             <TextBlock Text="Recent verified changes" FontSize="17" FontWeight="SemiBold" />
                             <TextBlock Text="Local history only. No sensitive values are uploaded." Foreground="{StaticResource SecondaryText}" Margin="0,4,0,10" />
                             <ListBox x:Name="HistoryList" Background="Transparent" BorderThickness="0" Foreground="{StaticResource PrimaryText}" MinHeight="54" MaxHeight="150" />
@@ -133,7 +141,7 @@
                     <Border Background="#151D31" BorderBrush="#39496D" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,18,0,0">
                         <StackPanel>
                             <TextBlock Text="Trust boundary" FontSize="15" FontWeight="SemiBold" />
-                            <TextBlock Text="The desktop app uses a narrow Windows adapter and records every applied change locally. Privileged operations will be moved behind a typed broker before additional system subsystems are added." Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,6,0,0" />
+                            <TextBlock Text="The desktop app uses narrow read-only diagnostics and records every applied change locally. Privileged operations will be moved behind a typed broker before additional system subsystems are added." Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,6,0,0" />
                         </StackPanel>
                     </Border>
                 </StackPanel>
