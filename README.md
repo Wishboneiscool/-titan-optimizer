@@ -4,42 +4,45 @@ Evidence-driven Windows performance optimization with measurement, safe change a
 
 > This project deliberately rejects placebo tweaks, silent system changes, and one-click application of unverified settings.
 
-## Status
+## Current status
 
-**Phase 1 foundation / first vertical slice**
+**Phase 1 foundation plus functional desktop shell**
 
-The repository currently contains the domain model and a Windows power-plan adapter designed to exercise the complete safe-change pipeline:
+The repository now contains a Windows desktop app that can scan installed power plans, preview a selected change, perform a user-confirmed apply, verify the resulting state, record the change in SQLite, and roll back the last change.
 
 ```text
-Detect → Validate → Preview → Snapshot → Apply → Verify → Record → Roll back
+Detect → Validate → Preview → Confirm → Apply → Verify → Record → Roll back
 ```
 
-The first implementation is intentionally context-dependent. It does not promise better FPS, lower latency, or higher benchmark scores merely because a power plan changed.
+The power-plan operation is intentionally classified as **Tier 2 — Context-dependent**. It does not promise better FPS, lower latency, or higher benchmark scores merely because a power plan changed.
 
 ## Safety principles
 
 - Dry-run and preview before mutation.
+- Explicit confirmation before applying a system change.
 - No arbitrary command execution.
-- The Windows adapter allowlists `powercfg.exe` and passes structured arguments.
+- The Windows adapter allowlists `powercfg.exe` and validates plan identifiers.
 - The original active power-plan GUID is the rollback value.
 - Verification is required after apply and rollback.
+- Change history is stored locally in SQLite.
 - Unsupported platforms fail closed.
 - Experimental and questionable optimizations are never automatic defaults.
 
 ## Technology
 
 - C# / .NET 8
-- WPF planned for the desktop UI
-- MVVM planned for presentation logic
-- SQLite planned for snapshots, history, profiles, and benchmark results
-- xUnit for tests
-- GitHub Actions for continuous integration
+- WPF desktop shell
+- SQLite persistence through Microsoft.Data.Sqlite
+- xUnit tests
+- GitHub Actions on Windows runners
 
 ## Repository layout
 
 ```text
 src/
+  TitanOptimizer.App/        Functional WPF desktop shell
   TitanOptimizer.Core/       Shared contracts and optimization metadata
+  TitanOptimizer.Persistence/SQLite change journal
   TitanOptimizer.Windows/    Windows-specific adapters
 
 tests/
@@ -53,28 +56,24 @@ docs/
   build.yml
 ```
 
-## First vertical slice
+## First working slice
 
-The first real optimization is a user-selected active power-plan change. It is classified as **Tier 2 — Context-dependent** because its effect depends on hardware, firmware, Windows configuration, workload, and battery policy.
+The app's first real optimization is a user-selected active power-plan change. It is useful as a safety-pipeline slice because the active GUID is detectable, the target must already exist, the original value is a clear rollback value, and the result can be verified by reading the active plan again.
 
-Before adding more system changes, this slice must gain:
+The app does not automatically choose a power plan and does not claim that High performance is universally better.
 
-1. Persistent snapshots and audit records.
-2. A desktop preview screen.
-3. A privileged broker boundary.
-4. Repeatable before/after benchmark association.
-5. Failure-injection tests for partial apply and verification failure.
+## Roadmap
+
+1. Functional power-plan desktop workflow — implemented
+2. Persistent snapshots and richer audit records — next
+3. Privileged broker and administrator detection
+4. Benchmark association and variance reporting
+5. Optimization definition loading and conflict resolution
+6. Profiles and settings
+7. Diagnostics and system inventory
+8. Additional evidence-backed optimization primitives
+9. Packaging, signing, installation, and release QA
 
 ## Explicit non-goals
 
 This project will not include registry cleaning, automatic service disabling, arbitrary downloaded scripts, silent security weakening, fake system scores, or claims of universal performance improvements.
-
-## Roadmap
-
-1. Core contracts and safe power-plan slice
-2. Snapshot and audit persistence
-3. Privileged broker and permission detection
-4. Desktop shell and preview workflow
-5. Benchmark engine
-6. Additional evidence-backed optimization primitives
-7. Profiles, diagnostics, packaging, and release QA

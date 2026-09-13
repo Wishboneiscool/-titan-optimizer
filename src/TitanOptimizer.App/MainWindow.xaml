@@ -1,0 +1,107 @@
+<Window x:Class="TitanOptimizer.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="TITAN OPTIMIZER"
+        Width="1180"
+        Height="760"
+        MinWidth="960"
+        MinHeight="640"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource PageBackground}">
+    <Grid Margin="26">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="24" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <StackPanel>
+                <TextBlock Text="TITAN OPTIMIZER" FontSize="28" FontWeight="Bold" />
+                <TextBlock Text="Measure first. Change carefully. Verify everything." Foreground="{StaticResource SecondaryText}" FontSize="14" Margin="0,5,0,0" />
+            </StackPanel>
+            <Border HorizontalAlignment="Right" Padding="12,7" CornerRadius="14" Background="#173B38">
+                <TextBlock Text="SAFE MODE READY" Foreground="{StaticResource Success}" FontWeight="SemiBold" />
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="215" />
+                <ColumnDefinition Width="22" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="12" Padding="16">
+                <StackPanel>
+                    <TextBlock Text="WORKSPACE" Foreground="{StaticResource SecondaryText}" FontSize="11" FontWeight="Bold" Margin="0,0,0,12" />
+                    <Button Content="Dashboard" HorizontalContentAlignment="Left" />
+                    <Button Content="Recommendations" HorizontalContentAlignment="Left" />
+                    <Button Content="Change history" HorizontalContentAlignment="Left" />
+                    <Button Content="Diagnostics" HorizontalContentAlignment="Left" />
+                    <Button Content="Profiles" HorizontalContentAlignment="Left" />
+                    <Button Content="Settings" HorizontalContentAlignment="Left" />
+                    <Separator Margin="0,18,0,18" />
+                    <TextBlock Text="Current profile" Foreground="{StaticResource SecondaryText}" FontSize="11" />
+                    <TextBlock Text="Safe" FontSize="18" FontWeight="SemiBold" Margin="0,4,0,0" />
+                    <TextBlock Text="No automatic changes" Foreground="{StaticResource SecondaryText}" FontSize="12" Margin="0,2,0,0" />
+                </StackPanel>
+            </Border>
+
+            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <TextBlock Text="System overview" FontSize="22" FontWeight="SemiBold" />
+                    <TextBlock x:Name="StatusText" Text="Ready to scan this Windows machine." Foreground="{StaticResource SecondaryText}" Margin="0,5,0,18" />
+
+                    <UniformGrid Columns="4" Margin="0,0,0,18">
+                        <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="10" Padding="14" Margin="0,0,10,0">
+                            <StackPanel><TextBlock Text="SYSTEM HEALTH" Foreground="{StaticResource SecondaryText}" FontSize="11" /><TextBlock Text="—" FontSize="28" FontWeight="Bold" Margin="0,7,0,0" /><TextBlock Text="Awaiting scan" Foreground="{StaticResource SecondaryText}" FontSize="12" /></StackPanel>
+                        </Border>
+                        <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="10" Padding="14" Margin="0,0,10,0">
+                            <StackPanel><TextBlock Text="CPU" Foreground="{StaticResource SecondaryText}" FontSize="11" /><TextBlock Text="—" FontSize="28" FontWeight="Bold" Margin="0,7,0,0" /><TextBlock Text="Not measured" Foreground="{StaticResource SecondaryText}" FontSize="12" /></StackPanel>
+                        </Border>
+                        <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="10" Padding="14" Margin="0,0,10,0">
+                            <StackPanel><TextBlock Text="MEMORY" Foreground="{StaticResource SecondaryText}" FontSize="11" /><TextBlock Text="—" FontSize="28" FontWeight="Bold" Margin="0,7,0,0" /><TextBlock Text="Not measured" Foreground="{StaticResource SecondaryText}" FontSize="12" /></StackPanel>
+                        </Border>
+                        <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="10" Padding="14">
+                            <StackPanel><TextBlock Text="STORAGE" Foreground="{StaticResource SecondaryText}" FontSize="11" /><TextBlock Text="—" FontSize="28" FontWeight="Bold" Margin="0,7,0,0" /><TextBlock Text="Not measured" Foreground="{StaticResource SecondaryText}" FontSize="12" /></StackPanel>
+                        </Border>
+                    </UniformGrid>
+
+                    <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="12" Padding="20">
+                        <StackPanel>
+                            <TextBlock Text="Safe power-plan control" FontSize="20" FontWeight="SemiBold" />
+                            <TextBlock Text="This is a context-dependent change. TITAN will never claim a performance improvement without measurement." Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,6,0,18" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                                    <TextBlock Text="Detected active plan" Foreground="{StaticResource SecondaryText}" FontSize="11" />
+                                    <TextBlock x:Name="ActivePlanText" Text="Not scanned" FontSize="16" Margin="0,3,0,14" />
+                                    <TextBlock Text="Target plan" Foreground="{StaticResource SecondaryText}" FontSize="11" />
+                                    <ComboBox x:Name="PowerPlanComboBox" DisplayMemberPath="Name" SelectedValuePath="Guid" Height="32" Margin="0,4,0,0" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Bottom" Orientation="Horizontal">
+                                    <Button Content="Scan" Click="ScanButton_Click" />
+                                    <Button Content="Preview" Click="PreviewButton_Click" />
+                                    <Button Content="Apply" Click="ApplyButton_Click" Background="#235B68" />
+                                    <Button Content="Rollback" Click="RollbackButton_Click" Background="#4A293B" />
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock x:Name="PlanDetailsText" Text="No change selected." Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,18,0,0" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Background="#151D31" BorderBrush="#39496D" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,18,0,0">
+                        <StackPanel>
+                            <TextBlock Text="Trust boundary" FontSize="15" FontWeight="SemiBold" />
+                            <TextBlock Text="The desktop app uses a narrow Windows adapter and records every applied change locally. Privileged operations will be moved behind a typed broker before additional system subsystems are added." Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,6,0,0" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Window>

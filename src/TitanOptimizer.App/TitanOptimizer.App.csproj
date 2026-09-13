@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <AssemblyName>TitanOptimizer</AssemblyName>
+    <RootNamespace>TitanOptimizer.App</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TitanOptimizer.Core\TitanOptimizer.Core.csproj" />
+    <ProjectReference Include="..\TitanOptimizer.Persistence\TitanOptimizer.Persistence.csproj" />
+    <ProjectReference Include="..\TitanOptimizer.Windows\TitanOptimizer.Windows.csproj" />
+  </ItemGroup>
+</Project>

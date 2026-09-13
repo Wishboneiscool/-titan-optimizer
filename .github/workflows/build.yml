@@ -10,8 +10,8 @@ permissions:
   contents: read
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  build-and-test:
+    runs-on: windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -19,9 +19,9 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-      - name: Restore
-        run: dotnet restore tests/TitanOptimizer.Windows.Tests/TitanOptimizer.Windows.Tests.csproj
-      - name: Build
-        run: dotnet build tests/TitanOptimizer.Windows.Tests/TitanOptimizer.Windows.Tests.csproj --configuration Release --no-restore
-      - name: Test
-        run: dotnet test tests/TitanOptimizer.Windows.Tests/TitanOptimizer.Windows.Tests.csproj --configuration Release --no-build --verbosity normal
+      - name: Restore desktop app
+        run: dotnet restore src/TitanOptimizer.App/TitanOptimizer.App.csproj
+      - name: Build desktop app
+        run: dotnet build src/TitanOptimizer.App/TitanOptimizer.App.csproj --configuration Release --no-restore
+      - name: Run tests
+        run: dotnet test tests/TitanOptimizer.Windows.Tests/TitanOptimizer.Windows.Tests.csproj --configuration Release
