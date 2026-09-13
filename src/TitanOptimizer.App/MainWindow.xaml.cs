@@ -11,6 +11,7 @@ using TitanOptimizer.Persistence;
 using TitanOptimizer.Persistence.Catalog;
 using TitanOptimizer.Persistence.Configuration;
 using TitanOptimizer.Persistence.Profiles;
+using TitanOptimizer.Windows.Network;
 using TitanOptimizer.Windows.Power;
 using TitanOptimizer.Windows.Security;
 using TitanOptimizer.Windows.Startup;
@@ -25,6 +26,7 @@ public partial class MainWindow : Window
     private readonly WindowsSystemProfiler _systemProfiler;
     private readonly WindowsSecurityContext _securityContext;
     private readonly WindowsStartupInventory _startupInventory;
+    private readonly WindowsNetworkDiagnostics _networkDiagnostics;
     private readonly SqliteChangeJournal _journal;
     private readonly SqliteBenchmarkJournal _benchmarkJournal;
     private readonly JsonOptimizationCatalog _catalog;
@@ -43,6 +45,7 @@ public partial class MainWindow : Window
         _systemProfiler = new WindowsSystemProfiler();
         _securityContext = new WindowsSecurityContext();
         _startupInventory = new WindowsStartupInventory();
+        _networkDiagnostics = new WindowsNetworkDiagnostics();
         _catalog = new JsonOptimizationCatalog(Path.Combine(AppContext.BaseDirectory, "data", "optimizations"));
         _profileStore = new JsonProfileStore(Path.Combine(AppContext.BaseDirectory, "data", "profiles"));
         _authorizationPolicy = new OperationAuthorizationPolicy();
@@ -84,7 +87,7 @@ public partial class MainWindow : Window
     private async void ScanButton_Click(object sender, RoutedEventArgs e)
     {
         ScanButton.IsEnabled = false;
-        SetStatus("Scanning system, power plans, startup locations, and local optimization definitions…", false);
+        SetStatus("Scanning system, power plans, startup locations, network adapters, and local optimization definitions…", false);
         try
         {
             var scan = await Task.Run(() =>
@@ -94,14 +97,15 @@ public partial class MainWindow : Window
                 var active = _powerPlanProvider.GetActivePlan();
                 var definitions = _catalog.LoadAll();
                 var startupItems = _startupInventory.Scan();
+                var networkAdapters = _networkDiagnostics.Scan();
                 var recommendations = _recommendationEngine.Build(
                     definitions,
                     new RecommendationContext(
                         plans.Count > 1,
                         startupItems.Count,
                         false,
-                        new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Power management", "Startup" }));
-                return (Snapshot: snapshot, Plans: plans, Active: active, Definitions: definitions, StartupItems: startupItems, Recommendations: recommendations);
+                        new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Power management", "Startup", "Networking" }));
+                return (Snapshot: snapshot, Plans: plans, Active: active, Definitions: definitions, StartupItems: startupItems, NetworkAdapters: networkAdapters, Recommendations: recommendations);
             });
 
             CatalogList.ItemsSource = scan.Definitions
@@ -113,13 +117,18 @@ public partial class MainWindow : Window
                 : scan.StartupItems
                     .Select(item => $"{item.Name}  •  {item.Source}  •  {item.EstimatedImpact}")
                     .ToArray();
+            NetworkList.ItemsSource = scan.NetworkAdapters.Count == 0
+                ? new[] { "No network adapters detected." }
+                : scan.NetworkAdapters
+                    .Select(adapter => $"{adapter.Name}  •  {adapter.Type}  •  {adapter.Status}  •  {adapter.Addresses.Count} addresses")
+                    .ToArray();
             PowerPlanComboBox.ItemsSource = scan.Plans;
             PowerPlanComboBox.SelectedItem = scan.Plans.FirstOrDefault(plan => plan.Guid == scan.Active?.Guid);
             ActivePlanText.Text = scan.Active is null ? "Unable to detect" : $"{scan.Active.Name} ({scan.Active.Guid})";
             CpuValue.Text = scan.Snapshot.CpuLogicalProcessors.ToString();
             MemoryValue.Text = FormatBytes(scan.Snapshot.AvailableMemoryBytes);
             StorageValue.Text = scan.Snapshot.Volumes.Count.ToString();
-            SetStatus($"Scan complete: {scan.Snapshot.CpuLogicalProcessors} logical processors, {FormatBytes(scan.Snapshot.AvailableMemoryBytes)} available memory, {scan.Plans.Count} power plans, {scan.StartupItems.Count} startup entries, {scan.Recommendations.Count} review items.", false);
+            SetStatus($"Scan complete: {scan.Snapshot.CpuLogicalProcessors} logical processors, {FormatBytes(scan.Snapshot.AvailableMemoryBytes)} available memory, {scan.Plans.Count} power plans, {scan.StartupItems.Count} startup entries, {scan.NetworkAdapters.Count} adapters, {scan.Recommendations.Count} review items.", false);
             PlanDetailsText.Text = FormatSnapshot(scan.Snapshot);
         }
         catch (Exception ex)
