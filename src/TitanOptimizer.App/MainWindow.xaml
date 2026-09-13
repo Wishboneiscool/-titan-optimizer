@@ -43,8 +43,8 @@
                     <Button Content="Settings" HorizontalContentAlignment="Left" />
                     <Separator Margin="0,18,0,18" />
                     <TextBlock Text="Current profile" Foreground="{StaticResource SecondaryText}" FontSize="11" />
-                    <TextBlock Text="Safe" FontSize="18" FontWeight="SemiBold" Margin="0,4,0,0" />
-                    <TextBlock Text="No automatic changes" Foreground="{StaticResource SecondaryText}" FontSize="12" Margin="0,2,0,0" />
+                    <ComboBox x:Name="ProfileComboBox" DisplayMemberPath="Name" Height="32" Margin="0,5,0,0" SelectionChanged="ProfileComboBox_SelectionChanged" />
+                    <TextBlock x:Name="ProfileDescriptionText" Text="No automatic changes" Foreground="{StaticResource SecondaryText}" FontSize="12" TextWrapping="Wrap" Margin="0,7,0,0" />
                 </StackPanel>
             </Border>
 
