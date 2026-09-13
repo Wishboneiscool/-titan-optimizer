@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using TitanOptimizer.Core.Benchmarking;
+using TitanOptimizer.Core.Configuration;
 using TitanOptimizer.Core.Engine;
 using TitanOptimizer.Core.Models;
 using TitanOptimizer.Core.Profiles;
@@ -8,6 +9,7 @@ using TitanOptimizer.Core.Recommendations;
 using TitanOptimizer.Core.Safety;
 using TitanOptimizer.Persistence;
 using TitanOptimizer.Persistence.Catalog;
+using TitanOptimizer.Persistence.Configuration;
 using TitanOptimizer.Persistence.Profiles;
 using TitanOptimizer.Windows.Power;
 using TitanOptimizer.Windows.Security;
@@ -27,8 +29,10 @@ public partial class MainWindow : Window
     private readonly SqliteBenchmarkJournal _benchmarkJournal;
     private readonly JsonOptimizationCatalog _catalog;
     private readonly JsonProfileStore _profileStore;
+    private readonly JsonSettingsStore _settingsStore;
     private readonly OperationAuthorizationPolicy _authorizationPolicy;
     private readonly RecommendationEngine _recommendationEngine;
+    private AppSettings _settings;
     private PowerPlanChangePlan? _lastPlan;
 
     public MainWindow()
@@ -44,13 +48,19 @@ public partial class MainWindow : Window
         _authorizationPolicy = new OperationAuthorizationPolicy();
         _recommendationEngine = new RecommendationEngine();
 
-        var profiles = _profileStore.List();
-        ProfileComboBox.ItemsSource = profiles;
-        ProfileComboBox.SelectedIndex = profiles.Count == 0 ? -1 : 0;
-
         var dataDirectory = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "TitanOptimizer");
+        _settingsStore = new JsonSettingsStore(Path.Combine(dataDirectory, "settings.json"));
+        _settings = _settingsStore.Load();
+
+        var profiles = _profileStore.List();
+        ProfileComboBox.ItemsSource = profiles;
+        ProfileComboBox.SelectedIndex = Math.Max(
+            0,
+            profiles.Select((profile, index) => new { profile, index })
+                .FirstOrDefault(item => item.profile.Id.Equals(_settings.ActiveProfileId, StringComparison.OrdinalIgnoreCase))?.index ?? 0);
+
         var databasePath = Path.Combine(dataDirectory, "titan-optimizer.db");
         _journal = new SqliteChangeJournal(databasePath);
         _benchmarkJournal = new SqliteBenchmarkJournal(databasePath);
@@ -65,6 +75,8 @@ public partial class MainWindow : Window
             return;
         }
 
+        _settings = _settings with { ActiveProfileId = profile.Id };
+        _settingsStore.Save(_settings);
         ProfileDescriptionText.Text = profile.Description;
         SetStatus($"Profile selected: {profile.Name}. No system changes were applied.", false);
     }
