@@ -142,6 +142,27 @@ public partial class MainWindow : Window
         }
     }
 
+    private void DryRunButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (PowerPlanComboBox.SelectedItem is not PowerPlan target)
+        {
+            SetStatus("Choose a target power plan first.", true);
+            return;
+        }
+
+        try
+        {
+            _lastPlan = _powerPlanService.Preview(target.Guid);
+            var result = _powerPlanService.Execute(_lastPlan, OperationMode.DryRun);
+            PlanDetailsText.Text = result.Message;
+            SetStatus("Dry run complete. No system change was made and nothing was logged as applied.", false);
+        }
+        catch (Exception ex)
+        {
+            SetStatus($"Dry run skipped: {ex.Message}", true);
+        }
+    }
+
     private void ApplyButton_Click(object sender, RoutedEventArgs e)
     {
         if (PowerPlanComboBox.SelectedItem is not PowerPlan target)
