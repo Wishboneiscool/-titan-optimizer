@@ -96,6 +96,17 @@
 
                     <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,18,0,0">
                         <StackPanel>
+                            <TextBlock Text="Measurement" FontSize="17" FontWeight="SemiBold" />
+                            <TextBlock Text="This deterministic local workload validates the measurement pipeline. It is not a gaming benchmark or an FPS predictor." Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,4,0,10" />
+                            <StackPanel Orientation="Horizontal">
+                                <Button x:Name="BenchmarkButton" Content="Run synthetic CPU benchmark" Click="BenchmarkButton_Click" />
+                                <TextBlock x:Name="BenchmarkText" Text="No measurement yet." Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center" Margin="4,0,0,0" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,18,0,0">
+                        <StackPanel>
                             <TextBlock Text="Recent verified changes" FontSize="17" FontWeight="SemiBold" />
                             <TextBlock Text="Local history only. No sensitive values are uploaded." Foreground="{StaticResource SecondaryText}" Margin="0,4,0,10" />
                             <ListBox x:Name="HistoryList" Background="Transparent" BorderThickness="0" Foreground="{StaticResource PrimaryText}" MinHeight="54" MaxHeight="150" />
