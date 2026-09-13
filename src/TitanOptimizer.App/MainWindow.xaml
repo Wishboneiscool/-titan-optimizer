@@ -35,12 +35,12 @@
             <Border Grid.Column="0" Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="12" Padding="16">
                 <StackPanel>
                     <TextBlock Text="WORKSPACE" Foreground="{StaticResource SecondaryText}" FontSize="11" FontWeight="Bold" Margin="0,0,0,12" />
-                    <Button Content="Dashboard" HorizontalContentAlignment="Left" />
-                    <Button Content="Recommendations" HorizontalContentAlignment="Left" />
-                    <Button Content="Change history" HorizontalContentAlignment="Left" />
-                    <Button Content="Diagnostics" HorizontalContentAlignment="Left" />
-                    <Button Content="Profiles" HorizontalContentAlignment="Left" />
-                    <Button Content="Settings" HorizontalContentAlignment="Left" />
+                    <Button Content="Dashboard" Tag="dashboard" Click="WorkspaceButton_Click" HorizontalContentAlignment="Left" />
+                    <Button Content="Recommendations" Tag="recommendations" Click="WorkspaceButton_Click" HorizontalContentAlignment="Left" />
+                    <Button Content="Change history" Tag="history" Click="WorkspaceButton_Click" HorizontalContentAlignment="Left" />
+                    <Button Content="Diagnostics" Tag="diagnostics" Click="WorkspaceButton_Click" HorizontalContentAlignment="Left" />
+                    <Button Content="Profiles" Tag="profiles" Click="WorkspaceButton_Click" HorizontalContentAlignment="Left" />
+                    <Button Content="Settings" Tag="settings" Click="WorkspaceButton_Click" HorizontalContentAlignment="Left" />
                     <Separator Margin="0,18,0,18" />
                     <TextBlock Text="Current profile" Foreground="{StaticResource SecondaryText}" FontSize="11" />
                     <ComboBox x:Name="ProfileComboBox" DisplayMemberPath="Name" Height="32" Margin="0,5,0,0" SelectionChanged="ProfileComboBox_SelectionChanged" />
@@ -48,9 +48,9 @@
                 </StackPanel>
             </Border>
 
-            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+            <ScrollViewer x:Name="ContentScrollViewer" Grid.Column="2" VerticalScrollBarVisibility="Auto">
                 <StackPanel>
-                    <TextBlock Text="System overview" FontSize="22" FontWeight="SemiBold" />
+                    <TextBlock x:Name="OverviewSection" Text="System overview" FontSize="22" FontWeight="SemiBold" />
                     <TextBlock x:Name="StatusText" Text="Ready to scan this Windows machine." Foreground="{StaticResource SecondaryText}" Margin="0,5,0,18" />
 
                     <UniformGrid Columns="4" Margin="0,0,0,18">
@@ -68,7 +68,7 @@
                         </Border>
                     </UniformGrid>
 
-                    <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="12" Padding="20">
+                    <Border x:Name="PowerSection" Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="12" Padding="20">
                         <StackPanel>
                             <TextBlock Text="Safe power-plan control" FontSize="20" FontWeight="SemiBold" />
                             <TextBlock Text="This is a context-dependent change. TITAN will never claim a performance improvement without measurement." Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,6,0,18" />
@@ -95,7 +95,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,18,0,0">
+                    <Border x:Name="MeasurementSection" Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,18,0,0">
                         <StackPanel>
                             <TextBlock Text="Measurement" FontSize="17" FontWeight="SemiBold" />
                             <TextBlock Text="This deterministic local workload validates the measurement pipeline. It is not a gaming benchmark or an FPS predictor." Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,4,0,10" />
@@ -106,35 +106,46 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,18,0,0">
+                    <Border x:Name="RecommendationsSection" Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,18,0,0">
                         <StackPanel>
                             <TextBlock Text="Optimization explorer" FontSize="17" FontWeight="SemiBold" />
                             <TextBlock Text="Only definitions loaded from the local, versioned catalog are shown." Foreground="{StaticResource SecondaryText}" Margin="0,4,0,10" />
-                            <ListBox x:Name="CatalogList" Background="Transparent" BorderThickness="0" Foreground="{StaticResource PrimaryText}" MinHeight="54" MaxHeight="150" />
+                            <ListBox x:Name="CatalogList" MinHeight="54" MaxHeight="150" />
                         </StackPanel>
                     </Border>
 
-                    <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,18,0,0">
+                    <Border x:Name="DiagnosticsSection" Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,18,0,0">
                         <StackPanel>
                             <TextBlock Text="Startup inventory" FontSize="17" FontWeight="SemiBold" />
                             <TextBlock Text="Read-only inventory from supported Windows startup locations. Nothing is disabled automatically." Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,4,0,10" />
-                            <ListBox x:Name="StartupList" Background="Transparent" BorderThickness="0" Foreground="{StaticResource PrimaryText}" MinHeight="54" MaxHeight="150" />
+                            <ListBox x:Name="StartupList" MinHeight="54" MaxHeight="150" />
                         </StackPanel>
                     </Border>
 
-                    <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,18,0,0">
+                    <Border x:Name="NetworkSection" Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,18,0,0">
                         <StackPanel>
                             <TextBlock Text="Network adapters" FontSize="17" FontWeight="SemiBold" />
                             <TextBlock Text="Read-only adapter, link, address, and gateway inventory. No network settings are changed." Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,4,0,10" />
-                            <ListBox x:Name="NetworkList" Background="Transparent" BorderThickness="0" Foreground="{StaticResource PrimaryText}" MinHeight="54" MaxHeight="150" />
+                            <ListBox x:Name="NetworkList" MinHeight="54" MaxHeight="150" />
                         </StackPanel>
                     </Border>
 
-                    <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,18,0,0">
+                    <Border x:Name="HistorySection" Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,18,0,0">
                         <StackPanel>
                             <TextBlock Text="Recent verified changes" FontSize="17" FontWeight="SemiBold" />
                             <TextBlock Text="Local history only. No sensitive values are uploaded." Foreground="{StaticResource SecondaryText}" Margin="0,4,0,10" />
-                            <ListBox x:Name="HistoryList" Background="Transparent" BorderThickness="0" Foreground="{StaticResource PrimaryText}" MinHeight="54" MaxHeight="150" />
+                            <ListBox x:Name="HistoryList" MinHeight="54" MaxHeight="150" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border x:Name="SettingsSection" Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,18,0,0">
+                        <StackPanel>
+                            <TextBlock Text="Settings" FontSize="17" FontWeight="SemiBold" />
+                            <TextBlock Text="These controls only change local app behavior. They never apply system changes automatically." Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,4,0,10" />
+                            <CheckBox x:Name="AutomaticRecommendationsCheckBox" Content="Show evidence-gated recommendations after scans" />
+                            <CheckBox x:Name="ShowExperimentalCheckBox" Content="Show experimental catalog definitions" />
+                            <CheckBox x:Name="ReducedMotionCheckBox" Content="Use reduced motion" />
+                            <Button Content="Save settings" Click="SaveSettingsButton_Click" HorizontalAlignment="Left" Margin="0,8,0,0" />
                         </StackPanel>
                     </Border>
 
