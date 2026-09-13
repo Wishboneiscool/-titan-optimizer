@@ -4,6 +4,7 @@ using TitanOptimizer.Core.Benchmarking;
 using TitanOptimizer.Core.Engine;
 using TitanOptimizer.Core.Models;
 using TitanOptimizer.Core.Profiles;
+using TitanOptimizer.Core.Safety;
 using TitanOptimizer.Persistence;
 using TitanOptimizer.Persistence.Catalog;
 using TitanOptimizer.Persistence.Profiles;
@@ -21,6 +22,7 @@ public partial class MainWindow : Window
     private readonly SqliteBenchmarkJournal _benchmarkJournal;
     private readonly JsonOptimizationCatalog _catalog;
     private readonly JsonProfileStore _profileStore;
+    private readonly OperationAuthorizationPolicy _authorizationPolicy;
     private PowerPlanChangePlan? _lastPlan;
 
     public MainWindow()
@@ -31,6 +33,7 @@ public partial class MainWindow : Window
         _systemProfiler = new WindowsSystemProfiler();
         _catalog = new JsonOptimizationCatalog(Path.Combine(AppContext.BaseDirectory, "data", "optimizations"));
         _profileStore = new JsonProfileStore(Path.Combine(AppContext.BaseDirectory, "data", "profiles"));
+        _authorizationPolicy = new OperationAuthorizationPolicy();
 
         var profiles = _profileStore.List();
         ProfileComboBox.ItemsSource = profiles;
@@ -129,8 +132,26 @@ public partial class MainWindow : Window
                 return;
             }
 
+            var definition = _catalog.LoadAll()
+                .SingleOrDefault(candidate => candidate.Id.Equals("power-plan.active", StringComparison.OrdinalIgnoreCase));
+            if (definition is null)
+            {
+                SetStatus("Change blocked: the catalog definition is unavailable.", true);
+                return;
+            }
+
+            var authorization = _authorizationPolicy.Validate(
+                definition,
+                OperationMode.Apply,
+                new AuthorizationContext(IsAdministrator: false, UserConfirmed: true, IsDryRun: false));
+            if (!authorization.IsValid)
+            {
+                SetStatus($"Change blocked: {authorization.Reason}", true);
+                return;
+            }
+
             var result = _powerPlanService.Execute(_lastPlan, OperationMode.Apply);
-            WriteRecord(_lastPlan, result, "power-plan.active");
+            WriteRecord(_lastPlan, result, definition.Id);
             SetStatus(result.Message, false);
             ActivePlanText.Text = $"{_lastPlan.Target.Name} ({_lastPlan.Target.Guid})";
             PlanDetailsText.Text = "Applied and verified. Use Rollback to restore the original plan.";
