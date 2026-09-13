@@ -1,4 +1,4 @@
-# TITAN OPTIMIZER
+# TITAN OPTIMIZER this is ai and its ass just experimental also pretty shit 
 
 Evidence-driven Windows performance optimization with measurement, safe change application, verification, and rollback.
 
