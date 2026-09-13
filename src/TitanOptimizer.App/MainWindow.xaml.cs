@@ -1,8 +1,10 @@
 using System.Windows;
+using TitanOptimizer.Core.Benchmarking;
 using TitanOptimizer.Core.Engine;
 using TitanOptimizer.Core.Models;
 using TitanOptimizer.Persistence;
 using TitanOptimizer.Windows.Power;
+using TitanOptimizer.Windows.System;
 
 namespace TitanOptimizer.App;
 
@@ -10,6 +12,7 @@ public partial class MainWindow : Window
 {
     private readonly IPowerPlanProvider _powerPlanProvider;
     private readonly PowerPlanChangeService _powerPlanService;
+    private readonly WindowsSystemProfiler _systemProfiler;
     private readonly SqliteChangeJournal _journal;
     private PowerPlanChangePlan? _lastPlan;
 
@@ -18,6 +21,7 @@ public partial class MainWindow : Window
         InitializeComponent();
         _powerPlanProvider = new PowerCfgPowerPlanProvider();
         _powerPlanService = new PowerPlanChangeService(_powerPlanProvider);
+        _systemProfiler = new WindowsSystemProfiler();
 
         var dataDirectory = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -29,13 +33,14 @@ public partial class MainWindow : Window
     {
         try
         {
+            var snapshot = _systemProfiler.Capture();
             var plans = _powerPlanProvider.ListPlans();
             var active = _powerPlanProvider.GetActivePlan();
             PowerPlanComboBox.ItemsSource = plans;
             PowerPlanComboBox.SelectedItem = plans.FirstOrDefault(plan => plan.Guid == active?.Guid);
             ActivePlanText.Text = active is null ? "Unable to detect" : $"{active.Name} ({active.Guid})";
-            SetStatus($"Detected {plans.Count} installed power plans.", false);
-            PlanDetailsText.Text = "Select a target plan, then preview it before applying.";
+            SetStatus($"Scan complete: {snapshot.CpuLogicalProcessors} logical processors, {FormatBytes(snapshot.AvailableMemoryBytes)} available memory, {plans.Count} power plans.", false);
+            PlanDetailsText.Text = FormatSnapshot(snapshot);
         }
         catch (Exception ex)
         {
@@ -153,6 +158,30 @@ public partial class MainWindow : Window
             Error = null
         });
     }
+
+    private static string FormatSnapshot(TitanOptimizer.Core.Diagnostics.SystemSnapshot snapshot)
+    {
+        var volumes = snapshot.Volumes.Count == 0
+            ? "no readable volumes"
+            : string.Join(", ", snapshot.Volumes.Select(volume => $"{volume.Volume} {FormatBytes(volume.AvailableBytes)} free"));
+        return $"{snapshot.OperatingSystem}. Total memory: {FormatBytes(snapshot.TotalMemoryBytes)}. Storage: {volumes}.";
+    }
+
+    private static string FormatBytes(ulong bytes)
+    {
+        string[] suffixes = ["B", "KB", "MB", "GB", "TB"];
+        var value = (double)bytes;
+        var suffix = 0;
+        while (value >= 1024 && suffix < suffixes.Length - 1)
+        {
+            value /= 1024;
+            suffix++;
+        }
+
+        return $"{value:0.##} {suffixes[suffix]}";
+    }
+
+    private static string FormatBytes(long bytes) => FormatBytes((ulong)Math.Max(0, bytes));
 
     private void SetStatus(string message, bool isWarning)
     {
