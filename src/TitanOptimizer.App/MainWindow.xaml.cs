@@ -44,6 +44,9 @@ public partial class MainWindow : Window
             var plans = _powerPlanProvider.ListPlans();
             var active = _powerPlanProvider.GetActivePlan();
             var definitions = _catalog.LoadAll();
+            CatalogList.ItemsSource = definitions
+                .Select(definition => $"{definition.Name}  •  {definition.Tier}  •  {definition.Risk}")
+                .ToArray();
             PowerPlanComboBox.ItemsSource = plans;
             PowerPlanComboBox.SelectedItem = plans.FirstOrDefault(plan => plan.Guid == active?.Guid);
             ActivePlanText.Text = active is null ? "Unable to detect" : $"{active.Name} ({active.Guid})";
