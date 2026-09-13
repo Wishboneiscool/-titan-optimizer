@@ -10,6 +10,7 @@ using TitanOptimizer.Persistence.Catalog;
 using TitanOptimizer.Persistence.Profiles;
 using TitanOptimizer.Windows.Power;
 using TitanOptimizer.Windows.Security;
+using TitanOptimizer.Windows.Startup;
 using TitanOptimizer.Windows.System;
 
 namespace TitanOptimizer.App;
@@ -20,6 +21,7 @@ public partial class MainWindow : Window
     private readonly PowerPlanChangeService _powerPlanService;
     private readonly WindowsSystemProfiler _systemProfiler;
     private readonly WindowsSecurityContext _securityContext;
+    private readonly WindowsStartupInventory _startupInventory;
     private readonly SqliteChangeJournal _journal;
     private readonly SqliteBenchmarkJournal _benchmarkJournal;
     private readonly JsonOptimizationCatalog _catalog;
@@ -34,6 +36,7 @@ public partial class MainWindow : Window
         _powerPlanService = new PowerPlanChangeService(_powerPlanProvider);
         _systemProfiler = new WindowsSystemProfiler();
         _securityContext = new WindowsSecurityContext();
+        _startupInventory = new WindowsStartupInventory();
         _catalog = new JsonOptimizationCatalog(Path.Combine(AppContext.BaseDirectory, "data", "optimizations"));
         _profileStore = new JsonProfileStore(Path.Combine(AppContext.BaseDirectory, "data", "profiles"));
         _authorizationPolicy = new OperationAuthorizationPolicy();
@@ -66,7 +69,7 @@ public partial class MainWindow : Window
     private async void ScanButton_Click(object sender, RoutedEventArgs e)
     {
         ScanButton.IsEnabled = false;
-        SetStatus("Scanning system, power plans, and local optimization definitions…", false);
+        SetStatus("Scanning system, power plans, startup locations, and local optimization definitions…", false);
         try
         {
             var scan = await Task.Run(() =>
@@ -75,19 +78,25 @@ public partial class MainWindow : Window
                 var plans = _powerPlanProvider.ListPlans();
                 var active = _powerPlanProvider.GetActivePlan();
                 var definitions = _catalog.LoadAll();
-                return (Snapshot: snapshot, Plans: plans, Active: active, Definitions: definitions);
+                var startupItems = _startupInventory.Scan();
+                return (Snapshot: snapshot, Plans: plans, Active: active, Definitions: definitions, StartupItems: startupItems);
             });
 
             CatalogList.ItemsSource = scan.Definitions
                 .Select(definition => $"{definition.Name}  •  {definition.Tier}  •  {definition.Risk}")
                 .ToArray();
+            StartupList.ItemsSource = scan.StartupItems.Count == 0
+                ? new[] { "No startup entries detected in the supported locations." }
+                : scan.StartupItems
+                    .Select(item => $"{item.Name}  •  {item.Source}  •  {item.EstimatedImpact}")
+                    .ToArray();
             PowerPlanComboBox.ItemsSource = scan.Plans;
             PowerPlanComboBox.SelectedItem = scan.Plans.FirstOrDefault(plan => plan.Guid == scan.Active?.Guid);
             ActivePlanText.Text = scan.Active is null ? "Unable to detect" : $"{scan.Active.Name} ({scan.Active.Guid})";
             CpuValue.Text = scan.Snapshot.CpuLogicalProcessors.ToString();
             MemoryValue.Text = FormatBytes(scan.Snapshot.AvailableMemoryBytes);
             StorageValue.Text = scan.Snapshot.Volumes.Count.ToString();
-            SetStatus($"Scan complete: {scan.Snapshot.CpuLogicalProcessors} logical processors, {FormatBytes(scan.Snapshot.AvailableMemoryBytes)} available memory, {scan.Plans.Count} power plans, {scan.Definitions.Count} catalog entries.", false);
+            SetStatus($"Scan complete: {scan.Snapshot.CpuLogicalProcessors} logical processors, {FormatBytes(scan.Snapshot.AvailableMemoryBytes)} available memory, {scan.Plans.Count} power plans, {scan.StartupItems.Count} startup entries, {scan.Definitions.Count} catalog entries.", false);
             PlanDetailsText.Text = FormatSnapshot(scan.Snapshot);
         }
         catch (Exception ex)
