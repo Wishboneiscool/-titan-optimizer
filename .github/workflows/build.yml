@@ -25,5 +25,7 @@ jobs:
         run: dotnet build src/TitanOptimizer.App/TitanOptimizer.App.csproj --configuration Release --no-restore
       - name: Run core tests
         run: dotnet test tests/TitanOptimizer.Core.Tests/TitanOptimizer.Core.Tests.csproj --configuration Release
+      - name: Run persistence tests
+        run: dotnet test tests/TitanOptimizer.Persistence.Tests/TitanOptimizer.Persistence.Tests.csproj --configuration Release
       - name: Run Windows adapter tests
         run: dotnet test tests/TitanOptimizer.Windows.Tests/TitanOptimizer.Windows.Tests.csproj --configuration Release
