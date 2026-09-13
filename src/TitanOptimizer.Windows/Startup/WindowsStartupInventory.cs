@@ -1,8 +1,10 @@
+using System.Runtime.Versioning;
 using Microsoft.Win32;
 using TitanOptimizer.Core.Diagnostics;
 
 namespace TitanOptimizer.Windows.Startup;
 
+[SupportedOSPlatform("windows")]
 public sealed class WindowsStartupInventory
 {
     private const string RunPath = "Software\\Microsoft\\Windows\\CurrentVersion\\Run";

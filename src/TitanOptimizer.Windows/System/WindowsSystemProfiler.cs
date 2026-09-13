@@ -1,8 +1,10 @@
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using TitanOptimizer.Core.Diagnostics;
 
 namespace TitanOptimizer.Windows.System;
 
+[SupportedOSPlatform("windows")]
 public sealed class WindowsSystemProfiler
 {
     public SystemSnapshot Capture()

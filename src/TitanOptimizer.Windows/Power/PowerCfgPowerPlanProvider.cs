@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 
 namespace TitanOptimizer.Windows.Power;
@@ -7,6 +8,7 @@ namespace TitanOptimizer.Windows.Power;
 /// Narrow adapter for the built-in Windows powercfg executable.
 /// No caller-provided executable or free-form command text is accepted.
 /// </summary>
+[SupportedOSPlatform("windows")]
 public sealed class PowerCfgPowerPlanProvider : IPowerPlanProvider
 {
     private static readonly Regex PlanRegex = new(
