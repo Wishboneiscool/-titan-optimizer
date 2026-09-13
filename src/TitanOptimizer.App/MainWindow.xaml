@@ -84,7 +84,7 @@
                                     <ComboBox x:Name="PowerPlanComboBox" DisplayMemberPath="Name" SelectedValuePath="Guid" Height="32" Margin="0,4,0,0" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Bottom" Orientation="Horizontal">
-                                    <Button Content="Scan" Click="ScanButton_Click" />
+                                    <Button x:Name="ScanButton" Content="Scan" Click="ScanButton_Click" />
                                     <Button Content="Preview" Click="PreviewButton_Click" />
                                     <Button Content="Apply" Click="ApplyButton_Click" Background="#235B68" />
                                     <Button Content="Rollback" Click="RollbackButton_Click" Background="#4A293B" />
