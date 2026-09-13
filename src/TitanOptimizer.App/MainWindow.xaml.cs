@@ -144,6 +144,25 @@ public partial class MainWindow : Window
         }
     }
 
+    private async void BenchmarkButton_Click(object sender, RoutedEventArgs e)
+    {
+        BenchmarkButton.IsEnabled = false;
+        BenchmarkText.Text = "Running a deterministic local workload…";
+        try
+        {
+            var sample = await Task.Run(() => new SyntheticCpuBenchmark().Run());
+            BenchmarkText.Text = $"{sample.WorkUnitsPerSecond:N0} work units/sec ({sample.Duration.TotalMilliseconds:N0} ms).";
+        }
+        catch (Exception ex)
+        {
+            BenchmarkText.Text = $"Benchmark unavailable: {ex.Message}";
+        }
+        finally
+        {
+            BenchmarkButton.IsEnabled = true;
+        }
+    }
+
     private void WriteRecord(PowerPlanChangePlan plan, OperationResult result, string optimizationId)
     {
         _journal.Append(new ChangeRecord
