@@ -27,6 +27,7 @@ public partial class MainWindow : Window
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "TitanOptimizer");
         _journal = new SqliteChangeJournal(Path.Combine(dataDirectory, "titan-optimizer.db"));
+        RefreshHistory();
     }
 
     private void ScanButton_Click(object sender, RoutedEventArgs e)
@@ -157,6 +158,16 @@ public partial class MainWindow : Window
             RollbackAvailable = true,
             Error = null
         });
+        RefreshHistory();
+    }
+
+    private void RefreshHistory()
+    {
+        var records = _journal.GetRecent(20);
+        HistoryList.ItemsSource = records.Count == 0
+            ? new[] { "No applied changes recorded yet." }
+            : records.Select(record =>
+                $"{record.TimestampUtc.ToLocalTime():g}  •  {record.OptimizationId}  •  {record.Result}").ToArray();
     }
 
     private static string FormatSnapshot(TitanOptimizer.Core.Diagnostics.SystemSnapshot snapshot)
