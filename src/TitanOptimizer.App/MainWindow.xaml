@@ -55,16 +55,16 @@
 
                     <UniformGrid Columns="4" Margin="0,0,0,18">
                         <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="10" Padding="14" Margin="0,0,10,0">
-                            <StackPanel><TextBlock Text="SYSTEM HEALTH" Foreground="{StaticResource SecondaryText}" FontSize="11" /><TextBlock Text="—" FontSize="28" FontWeight="Bold" Margin="0,7,0,0" /><TextBlock Text="Awaiting scan" Foreground="{StaticResource SecondaryText}" FontSize="12" /></StackPanel>
+                            <StackPanel><TextBlock Text="SYSTEM HEALTH" Foreground="{StaticResource SecondaryText}" FontSize="11" /><TextBlock x:Name="SystemHealthValue" Text="N/A" FontSize="28" FontWeight="Bold" Margin="0,7,0,0" /><TextBlock Text="No composite score" Foreground="{StaticResource SecondaryText}" FontSize="12" /></StackPanel>
                         </Border>
                         <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="10" Padding="14" Margin="0,0,10,0">
-                            <StackPanel><TextBlock Text="CPU" Foreground="{StaticResource SecondaryText}" FontSize="11" /><TextBlock Text="—" FontSize="28" FontWeight="Bold" Margin="0,7,0,0" /><TextBlock Text="Not measured" Foreground="{StaticResource SecondaryText}" FontSize="12" /></StackPanel>
+                            <StackPanel><TextBlock Text="CPU" Foreground="{StaticResource SecondaryText}" FontSize="11" /><TextBlock x:Name="CpuValue" Text="—" FontSize="28" FontWeight="Bold" Margin="0,7,0,0" /><TextBlock Text="logical processors" Foreground="{StaticResource SecondaryText}" FontSize="12" /></StackPanel>
                         </Border>
                         <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="10" Padding="14" Margin="0,0,10,0">
-                            <StackPanel><TextBlock Text="MEMORY" Foreground="{StaticResource SecondaryText}" FontSize="11" /><TextBlock Text="—" FontSize="28" FontWeight="Bold" Margin="0,7,0,0" /><TextBlock Text="Not measured" Foreground="{StaticResource SecondaryText}" FontSize="12" /></StackPanel>
+                            <StackPanel><TextBlock Text="MEMORY" Foreground="{StaticResource SecondaryText}" FontSize="11" /><TextBlock x:Name="MemoryValue" Text="—" FontSize="28" FontWeight="Bold" Margin="0,7,0,0" /><TextBlock Text="available" Foreground="{StaticResource SecondaryText}" FontSize="12" /></StackPanel>
                         </Border>
                         <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="10" Padding="14">
-                            <StackPanel><TextBlock Text="STORAGE" Foreground="{StaticResource SecondaryText}" FontSize="11" /><TextBlock Text="—" FontSize="28" FontWeight="Bold" Margin="0,7,0,0" /><TextBlock Text="Not measured" Foreground="{StaticResource SecondaryText}" FontSize="12" /></StackPanel>
+                            <StackPanel><TextBlock Text="STORAGE" Foreground="{StaticResource SecondaryText}" FontSize="11" /><TextBlock x:Name="StorageValue" Text="—" FontSize="28" FontWeight="Bold" Margin="0,7,0,0" /><TextBlock Text="readable volumes" Foreground="{StaticResource SecondaryText}" FontSize="12" /></StackPanel>
                         </Border>
                     </UniformGrid>
 
