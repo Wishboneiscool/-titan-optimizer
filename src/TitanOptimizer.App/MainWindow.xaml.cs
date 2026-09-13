@@ -1,9 +1,12 @@
 using System.Windows;
+using System.Windows.Controls;
 using TitanOptimizer.Core.Benchmarking;
 using TitanOptimizer.Core.Engine;
 using TitanOptimizer.Core.Models;
+using TitanOptimizer.Core.Profiles;
 using TitanOptimizer.Persistence;
 using TitanOptimizer.Persistence.Catalog;
+using TitanOptimizer.Persistence.Profiles;
 using TitanOptimizer.Windows.Power;
 using TitanOptimizer.Windows.System;
 
@@ -17,6 +20,7 @@ public partial class MainWindow : Window
     private readonly SqliteChangeJournal _journal;
     private readonly SqliteBenchmarkJournal _benchmarkJournal;
     private readonly JsonOptimizationCatalog _catalog;
+    private readonly JsonProfileStore _profileStore;
     private PowerPlanChangePlan? _lastPlan;
 
     public MainWindow()
@@ -26,6 +30,11 @@ public partial class MainWindow : Window
         _powerPlanService = new PowerPlanChangeService(_powerPlanProvider);
         _systemProfiler = new WindowsSystemProfiler();
         _catalog = new JsonOptimizationCatalog(Path.Combine(AppContext.BaseDirectory, "data", "optimizations"));
+        _profileStore = new JsonProfileStore(Path.Combine(AppContext.BaseDirectory, "data", "profiles"));
+
+        var profiles = _profileStore.List();
+        ProfileComboBox.ItemsSource = profiles;
+        ProfileComboBox.SelectedIndex = profiles.Count == 0 ? -1 : 0;
 
         var dataDirectory = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -34,6 +43,17 @@ public partial class MainWindow : Window
         _journal = new SqliteChangeJournal(databasePath);
         _benchmarkJournal = new SqliteBenchmarkJournal(databasePath);
         RefreshHistory();
+    }
+
+    private void ProfileComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (ProfileComboBox.SelectedItem is not OptimizationProfile profile)
+        {
+            return;
+        }
+
+        ProfileDescriptionText.Text = profile.Description;
+        SetStatus($"Profile selected: {profile.Name}. No system changes were applied.", false);
     }
 
     private void ScanButton_Click(object sender, RoutedEventArgs e)
