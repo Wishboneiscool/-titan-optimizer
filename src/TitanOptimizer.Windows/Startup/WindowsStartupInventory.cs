@@ -1,3 +1,5 @@
+#pragma warning disable CA1416
+
 using System.Runtime.Versioning;
 using Microsoft.Win32;
 using TitanOptimizer.Core.Diagnostics;
@@ -73,3 +75,5 @@ public sealed class WindowsStartupInventory
         }
     }
 }
+
+#pragma warning restore CA1416
