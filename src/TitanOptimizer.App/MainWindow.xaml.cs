@@ -62,26 +62,37 @@ public partial class MainWindow : Window
         SetStatus($"Profile selected: {profile.Name}. No system changes were applied.", false);
     }
 
-    private void ScanButton_Click(object sender, RoutedEventArgs e)
+    private async void ScanButton_Click(object sender, RoutedEventArgs e)
     {
+        ScanButton.IsEnabled = false;
+        SetStatus("Scanning system, power plans, and local optimization definitions…", false);
         try
         {
-            var snapshot = _systemProfiler.Capture();
-            var plans = _powerPlanProvider.ListPlans();
-            var active = _powerPlanProvider.GetActivePlan();
-            var definitions = _catalog.LoadAll();
-            CatalogList.ItemsSource = definitions
+            var scan = await Task.Run(() =>
+            {
+                var snapshot = _systemProfiler.Capture();
+                var plans = _powerPlanProvider.ListPlans();
+                var active = _powerPlanProvider.GetActivePlan();
+                var definitions = _catalog.LoadAll();
+                return (Snapshot: snapshot, Plans: plans, Active: active, Definitions: definitions);
+            });
+
+            CatalogList.ItemsSource = scan.Definitions
                 .Select(definition => $"{definition.Name}  •  {definition.Tier}  •  {definition.Risk}")
                 .ToArray();
-            PowerPlanComboBox.ItemsSource = plans;
-            PowerPlanComboBox.SelectedItem = plans.FirstOrDefault(plan => plan.Guid == active?.Guid);
-            ActivePlanText.Text = active is null ? "Unable to detect" : $"{active.Name} ({active.Guid})";
-            SetStatus($"Scan complete: {snapshot.CpuLogicalProcessors} logical processors, {FormatBytes(snapshot.AvailableMemoryBytes)} available memory, {plans.Count} power plans, {definitions.Count} catalog entries.", false);
-            PlanDetailsText.Text = FormatSnapshot(snapshot);
+            PowerPlanComboBox.ItemsSource = scan.Plans;
+            PowerPlanComboBox.SelectedItem = scan.Plans.FirstOrDefault(plan => plan.Guid == scan.Active?.Guid);
+            ActivePlanText.Text = scan.Active is null ? "Unable to detect" : $"{scan.Active.Name} ({scan.Active.Guid})";
+            SetStatus($"Scan complete: {scan.Snapshot.CpuLogicalProcessors} logical processors, {FormatBytes(scan.Snapshot.AvailableMemoryBytes)} available memory, {scan.Plans.Count} power plans, {scan.Definitions.Count} catalog entries.", false);
+            PlanDetailsText.Text = FormatSnapshot(scan.Snapshot);
         }
         catch (Exception ex)
         {
             SetStatus($"Scan skipped: {ex.Message}", true);
+        }
+        finally
+        {
+            ScanButton.IsEnabled = true;
         }
     }
 
