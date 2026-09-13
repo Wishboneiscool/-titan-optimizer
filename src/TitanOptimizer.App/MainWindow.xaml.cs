@@ -9,6 +9,7 @@ using TitanOptimizer.Persistence;
 using TitanOptimizer.Persistence.Catalog;
 using TitanOptimizer.Persistence.Profiles;
 using TitanOptimizer.Windows.Power;
+using TitanOptimizer.Windows.Security;
 using TitanOptimizer.Windows.System;
 
 namespace TitanOptimizer.App;
@@ -18,6 +19,7 @@ public partial class MainWindow : Window
     private readonly IPowerPlanProvider _powerPlanProvider;
     private readonly PowerPlanChangeService _powerPlanService;
     private readonly WindowsSystemProfiler _systemProfiler;
+    private readonly WindowsSecurityContext _securityContext;
     private readonly SqliteChangeJournal _journal;
     private readonly SqliteBenchmarkJournal _benchmarkJournal;
     private readonly JsonOptimizationCatalog _catalog;
@@ -31,6 +33,7 @@ public partial class MainWindow : Window
         _powerPlanProvider = new PowerCfgPowerPlanProvider();
         _powerPlanService = new PowerPlanChangeService(_powerPlanProvider);
         _systemProfiler = new WindowsSystemProfiler();
+        _securityContext = new WindowsSecurityContext();
         _catalog = new JsonOptimizationCatalog(Path.Combine(AppContext.BaseDirectory, "data", "optimizations"));
         _profileStore = new JsonProfileStore(Path.Combine(AppContext.BaseDirectory, "data", "profiles"));
         _authorizationPolicy = new OperationAuthorizationPolicy();
@@ -143,7 +146,7 @@ public partial class MainWindow : Window
             var authorization = _authorizationPolicy.Validate(
                 definition,
                 OperationMode.Apply,
-                new AuthorizationContext(IsAdministrator: false, UserConfirmed: true, IsDryRun: false));
+                new AuthorizationContext(_securityContext.IsAdministrator, UserConfirmed: true, IsDryRun: false));
             if (!authorization.IsValid)
             {
                 SetStatus($"Change blocked: {authorization.Reason}", true);
