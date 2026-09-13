@@ -57,6 +57,9 @@ public partial class MainWindow : Window
             "TitanOptimizer");
         _settingsStore = new JsonSettingsStore(Path.Combine(dataDirectory, "settings.json"));
         _settings = _settingsStore.Load();
+        AutomaticRecommendationsCheckBox.IsChecked = _settings.AutomaticRecommendations;
+        ShowExperimentalCheckBox.IsChecked = _settings.ShowExperimentalDefinitions;
+        ReducedMotionCheckBox.IsChecked = _settings.ReducedMotion;
 
         var profiles = _profileStore.List();
         ProfileComboBox.ItemsSource = profiles;
@@ -85,6 +88,54 @@ public partial class MainWindow : Window
         SetStatus($"Profile selected: {profile.Name}. No system changes were applied.", false);
     }
 
+    private void WorkspaceButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button button)
+        {
+            return;
+        }
+
+        switch (button.Tag as string)
+        {
+            case "dashboard":
+                OverviewSection.BringIntoView();
+                SetStatus("Dashboard overview selected.", false);
+                break;
+            case "recommendations":
+                RecommendationsSection.BringIntoView();
+                SetStatus("Recommendations selected. Review items are never applied automatically.", false);
+                break;
+            case "history":
+                HistorySection.BringIntoView();
+                SetStatus("Change history selected.", false);
+                break;
+            case "diagnostics":
+                DiagnosticsSection.BringIntoView();
+                SetStatus("Read-only diagnostics selected.", false);
+                break;
+            case "profiles":
+                ProfileComboBox.Focus();
+                SetStatus("Profile selector focused. Changing it does not apply system changes.", false);
+                break;
+            case "settings":
+                SettingsSection.BringIntoView();
+                SetStatus("Settings selected.", false);
+                break;
+        }
+    }
+
+    private void SaveSettingsButton_Click(object sender, RoutedEventArgs e)
+    {
+        _settings = _settings with
+        {
+            AutomaticRecommendations = AutomaticRecommendationsCheckBox.IsChecked == true,
+            ShowExperimentalDefinitions = ShowExperimentalCheckBox.IsChecked == true,
+            ReducedMotion = ReducedMotionCheckBox.IsChecked == true
+        };
+        _settingsStore.Save(_settings);
+        SetStatus("Settings saved locally. No system changes were made.", false);
+    }
+
     private async void ScanButton_Click(object sender, RoutedEventArgs e)
     {
         ScanButton.IsEnabled = false;
@@ -99,17 +150,22 @@ public partial class MainWindow : Window
                 var definitions = _catalog.LoadAll();
                 var startupItems = _startupInventory.Scan();
                 var networkAdapters = _networkDiagnostics.Scan();
-                var recommendations = _recommendationEngine.Build(
-                    definitions,
-                    new RecommendationContext(
-                        plans.Count > 1,
-                        startupItems.Count,
-                        false,
-                        new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Power management", "Startup", "Networking" }));
+                IReadOnlyList<OptimizationRecommendation> recommendations = _settings.AutomaticRecommendations
+                    ? _recommendationEngine.Build(
+                        definitions,
+                        new RecommendationContext(
+                            plans.Count > 1,
+                            startupItems.Count,
+                            false,
+                            new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Power management", "Startup", "Networking" }))
+                    : Array.Empty<OptimizationRecommendation>();
                 return (Snapshot: snapshot, Plans: plans, Active: active, Definitions: definitions, StartupItems: startupItems, NetworkAdapters: networkAdapters, Recommendations: recommendations);
             });
 
-            CatalogList.ItemsSource = scan.Definitions
+            var visibleDefinitions = scan.Definitions
+                .Where(definition => _settings.ShowExperimentalDefinitions || definition.Tier != QualityTier.Experimental)
+                .ToArray();
+            CatalogList.ItemsSource = visibleDefinitions
                 .Select(definition => $"{definition.Name}  •  {definition.Tier}  •  {definition.Risk}")
                 .Concat(scan.Recommendations.Select(recommendation => $"REVIEW  •  {recommendation.Title}  •  {recommendation.Confidence}"))
                 .ToArray();
