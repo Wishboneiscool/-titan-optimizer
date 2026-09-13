@@ -15,6 +15,7 @@ public partial class MainWindow : Window
     private readonly PowerPlanChangeService _powerPlanService;
     private readonly WindowsSystemProfiler _systemProfiler;
     private readonly SqliteChangeJournal _journal;
+    private readonly SqliteBenchmarkJournal _benchmarkJournal;
     private readonly JsonOptimizationCatalog _catalog;
     private PowerPlanChangePlan? _lastPlan;
 
@@ -29,7 +30,9 @@ public partial class MainWindow : Window
         var dataDirectory = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "TitanOptimizer");
-        _journal = new SqliteChangeJournal(Path.Combine(dataDirectory, "titan-optimizer.db"));
+        var databasePath = Path.Combine(dataDirectory, "titan-optimizer.db");
+        _journal = new SqliteChangeJournal(databasePath);
+        _benchmarkJournal = new SqliteBenchmarkJournal(databasePath);
         RefreshHistory();
     }
 
@@ -155,7 +158,17 @@ public partial class MainWindow : Window
         try
         {
             var sample = await Task.Run(() => new SyntheticCpuBenchmark().Run());
-            BenchmarkText.Text = $"{sample.WorkUnitsPerSecond:N0} work units/sec ({sample.Duration.TotalMilliseconds:N0} ms).";
+            _benchmarkJournal.Append(new BenchmarkRecord
+            {
+                SessionId = Guid.NewGuid(),
+                Name = sample.Name,
+                CapturedUtc = sample.CapturedUtc,
+                Duration = sample.Duration,
+                WorkUnits = sample.WorkUnits,
+                WorkUnitsPerSecond = sample.WorkUnitsPerSecond,
+                RelatedOptimizationId = _lastPlan is null ? null : "power-plan.active"
+            });
+            BenchmarkText.Text = $"{sample.WorkUnitsPerSecond:N0} work units/sec ({sample.Duration.TotalMilliseconds:N0} ms). Saved locally.";
         }
         catch (Exception ex)
         {
