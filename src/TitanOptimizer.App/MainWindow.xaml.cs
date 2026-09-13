@@ -83,6 +83,9 @@ public partial class MainWindow : Window
             PowerPlanComboBox.ItemsSource = scan.Plans;
             PowerPlanComboBox.SelectedItem = scan.Plans.FirstOrDefault(plan => plan.Guid == scan.Active?.Guid);
             ActivePlanText.Text = scan.Active is null ? "Unable to detect" : $"{scan.Active.Name} ({scan.Active.Guid})";
+            CpuValue.Text = scan.Snapshot.CpuLogicalProcessors.ToString();
+            MemoryValue.Text = FormatBytes(scan.Snapshot.AvailableMemoryBytes);
+            StorageValue.Text = scan.Snapshot.Volumes.Count.ToString();
             SetStatus($"Scan complete: {scan.Snapshot.CpuLogicalProcessors} logical processors, {FormatBytes(scan.Snapshot.AvailableMemoryBytes)} available memory, {scan.Plans.Count} power plans, {scan.Definitions.Count} catalog entries.", false);
             PlanDetailsText.Text = FormatSnapshot(scan.Snapshot);
         }
