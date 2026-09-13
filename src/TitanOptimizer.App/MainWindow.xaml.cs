@@ -3,6 +3,7 @@ using TitanOptimizer.Core.Benchmarking;
 using TitanOptimizer.Core.Engine;
 using TitanOptimizer.Core.Models;
 using TitanOptimizer.Persistence;
+using TitanOptimizer.Persistence.Catalog;
 using TitanOptimizer.Windows.Power;
 using TitanOptimizer.Windows.System;
 
@@ -14,6 +15,7 @@ public partial class MainWindow : Window
     private readonly PowerPlanChangeService _powerPlanService;
     private readonly WindowsSystemProfiler _systemProfiler;
     private readonly SqliteChangeJournal _journal;
+    private readonly JsonOptimizationCatalog _catalog;
     private PowerPlanChangePlan? _lastPlan;
 
     public MainWindow()
@@ -22,6 +24,7 @@ public partial class MainWindow : Window
         _powerPlanProvider = new PowerCfgPowerPlanProvider();
         _powerPlanService = new PowerPlanChangeService(_powerPlanProvider);
         _systemProfiler = new WindowsSystemProfiler();
+        _catalog = new JsonOptimizationCatalog(Path.Combine(AppContext.BaseDirectory, "data", "optimizations"));
 
         var dataDirectory = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -37,10 +40,11 @@ public partial class MainWindow : Window
             var snapshot = _systemProfiler.Capture();
             var plans = _powerPlanProvider.ListPlans();
             var active = _powerPlanProvider.GetActivePlan();
+            var definitions = _catalog.LoadAll();
             PowerPlanComboBox.ItemsSource = plans;
             PowerPlanComboBox.SelectedItem = plans.FirstOrDefault(plan => plan.Guid == active?.Guid);
             ActivePlanText.Text = active is null ? "Unable to detect" : $"{active.Name} ({active.Guid})";
-            SetStatus($"Scan complete: {snapshot.CpuLogicalProcessors} logical processors, {FormatBytes(snapshot.AvailableMemoryBytes)} available memory, {plans.Count} power plans.", false);
+            SetStatus($"Scan complete: {snapshot.CpuLogicalProcessors} logical processors, {FormatBytes(snapshot.AvailableMemoryBytes)} available memory, {plans.Count} power plans, {definitions.Count} catalog entries.", false);
             PlanDetailsText.Text = FormatSnapshot(snapshot);
         }
         catch (Exception ex)
