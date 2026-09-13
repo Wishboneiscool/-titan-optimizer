@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "activeProfileId": "safe",
+  "automaticRecommendations": true,
+  "createSnapshotsBeforeApply": true,
+  "restorePointBeforeHighRisk": true,
+  "showExperimentalDefinitions": false,
+  "reducedMotion": false,
+  "startWithWindows": false
+}
