@@ -3,11 +3,12 @@ name: package
 on:
   workflow_dispatch:
   push:
+    branches: [ main ]
     tags:
       - "v*"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   package:
@@ -23,6 +24,8 @@ jobs:
         run: dotnet restore src/TitanOptimizer.App/TitanOptimizer.App.csproj
       - name: Run core tests
         run: dotnet test tests/TitanOptimizer.Core.Tests/TitanOptimizer.Core.Tests.csproj --configuration Release
+      - name: Run persistence tests
+        run: dotnet test tests/TitanOptimizer.Persistence.Tests/TitanOptimizer.Persistence.Tests.csproj --configuration Release
       - name: Run Windows adapter tests
         run: dotnet test tests/TitanOptimizer.Windows.Tests/TitanOptimizer.Windows.Tests.csproj --configuration Release
       - name: Build desktop app
@@ -30,8 +33,20 @@ jobs:
       - name: Publish
         shell: pwsh
         run: ./build/package.ps1
-      - name: Upload package
+      - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
           name: TitanOptimizer-win-x64
           path: artifacts/TitanOptimizer-win-x64.zip
+      - name: Publish latest downloadable build
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Latest downloadable build
+          body: |
+            Development build generated from the latest main branch.
+            This is an unsigned development build. Review the project safety notes before using system-changing features.
+          prerelease: true
+          make_latest: false
+          files: artifacts/TitanOptimizer-win-x64.zip
