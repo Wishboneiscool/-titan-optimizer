@@ -4,6 +4,7 @@ using TitanOptimizer.Core.Benchmarking;
 using TitanOptimizer.Core.Engine;
 using TitanOptimizer.Core.Models;
 using TitanOptimizer.Core.Profiles;
+using TitanOptimizer.Core.Recommendations;
 using TitanOptimizer.Core.Safety;
 using TitanOptimizer.Persistence;
 using TitanOptimizer.Persistence.Catalog;
@@ -27,6 +28,7 @@ public partial class MainWindow : Window
     private readonly JsonOptimizationCatalog _catalog;
     private readonly JsonProfileStore _profileStore;
     private readonly OperationAuthorizationPolicy _authorizationPolicy;
+    private readonly RecommendationEngine _recommendationEngine;
     private PowerPlanChangePlan? _lastPlan;
 
     public MainWindow()
@@ -40,6 +42,7 @@ public partial class MainWindow : Window
         _catalog = new JsonOptimizationCatalog(Path.Combine(AppContext.BaseDirectory, "data", "optimizations"));
         _profileStore = new JsonProfileStore(Path.Combine(AppContext.BaseDirectory, "data", "profiles"));
         _authorizationPolicy = new OperationAuthorizationPolicy();
+        _recommendationEngine = new RecommendationEngine();
 
         var profiles = _profileStore.List();
         ProfileComboBox.ItemsSource = profiles;
@@ -79,11 +82,19 @@ public partial class MainWindow : Window
                 var active = _powerPlanProvider.GetActivePlan();
                 var definitions = _catalog.LoadAll();
                 var startupItems = _startupInventory.Scan();
-                return (Snapshot: snapshot, Plans: plans, Active: active, Definitions: definitions, StartupItems: startupItems);
+                var recommendations = _recommendationEngine.Build(
+                    definitions,
+                    new RecommendationContext(
+                        plans.Count > 1,
+                        startupItems.Count,
+                        false,
+                        new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Power management", "Startup" }));
+                return (Snapshot: snapshot, Plans: plans, Active: active, Definitions: definitions, StartupItems: startupItems, Recommendations: recommendations);
             });
 
             CatalogList.ItemsSource = scan.Definitions
                 .Select(definition => $"{definition.Name}  •  {definition.Tier}  •  {definition.Risk}")
+                .Concat(scan.Recommendations.Select(recommendation => $"REVIEW  •  {recommendation.Title}  •  {recommendation.Confidence}"))
                 .ToArray();
             StartupList.ItemsSource = scan.StartupItems.Count == 0
                 ? new[] { "No startup entries detected in the supported locations." }
@@ -96,7 +107,7 @@ public partial class MainWindow : Window
             CpuValue.Text = scan.Snapshot.CpuLogicalProcessors.ToString();
             MemoryValue.Text = FormatBytes(scan.Snapshot.AvailableMemoryBytes);
             StorageValue.Text = scan.Snapshot.Volumes.Count.ToString();
-            SetStatus($"Scan complete: {scan.Snapshot.CpuLogicalProcessors} logical processors, {FormatBytes(scan.Snapshot.AvailableMemoryBytes)} available memory, {scan.Plans.Count} power plans, {scan.StartupItems.Count} startup entries, {scan.Definitions.Count} catalog entries.", false);
+            SetStatus($"Scan complete: {scan.Snapshot.CpuLogicalProcessors} logical processors, {FormatBytes(scan.Snapshot.AvailableMemoryBytes)} available memory, {scan.Plans.Count} power plans, {scan.StartupItems.Count} startup entries, {scan.Recommendations.Count} review items.", false);
             PlanDetailsText.Text = FormatSnapshot(scan.Snapshot);
         }
         catch (Exception ex)
