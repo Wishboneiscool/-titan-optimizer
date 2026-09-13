@@ -1,4 +1,5 @@
 using TitanOptimizer.Windows.Power;
+using Xunit;
 
 namespace TitanOptimizer.Windows.Tests;
 
