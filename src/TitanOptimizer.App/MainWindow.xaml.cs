@@ -48,6 +48,7 @@ public partial class MainWindow : Window
         var databasePath = Path.Combine(dataDirectory, "titan-optimizer.db");
         _journal = new SqliteChangeJournal(databasePath);
         _benchmarkJournal = new SqliteBenchmarkJournal(databasePath);
+        RestoreLastPlanFromHistory();
         RefreshHistory();
     }
 
@@ -256,6 +257,31 @@ public partial class MainWindow : Window
             Error = null
         });
         RefreshHistory();
+    }
+
+    private void RestoreLastPlanFromHistory()
+    {
+        var latest = _journal.GetRecent(50)
+            .FirstOrDefault(record => record.OptimizationId is "power-plan.active" or "power-plan.active.rollback");
+        if (latest is null || latest.OptimizationId == "power-plan.active.rollback" || latest.Result != "Verified")
+        {
+            return;
+        }
+
+        try
+        {
+            var plans = _powerPlanProvider.ListPlans();
+            var before = plans.FirstOrDefault(plan => plan.Guid.Equals(latest.Before, StringComparison.OrdinalIgnoreCase));
+            var target = plans.FirstOrDefault(plan => plan.Guid.Equals(latest.Requested, StringComparison.OrdinalIgnoreCase));
+            if (before is not null && target is not null)
+            {
+                _lastPlan = new PowerPlanChangePlan(before, target);
+            }
+        }
+        catch
+        {
+            // Recovery is best effort; the normal scan can reconstruct the state later.
+        }
     }
 
     private void RefreshHistory()
