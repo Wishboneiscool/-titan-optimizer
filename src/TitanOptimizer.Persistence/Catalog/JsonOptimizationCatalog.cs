@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using TitanOptimizer.Core.Models;
 
 namespace TitanOptimizer.Persistence.Catalog;
@@ -6,11 +7,7 @@ namespace TitanOptimizer.Persistence.Catalog;
 public sealed class JsonOptimizationCatalog
 {
     private readonly string _directory;
-    private readonly JsonSerializerOptions _options = new(JsonSerializerDefaults.Web)
-    {
-        ReadCommentHandling = JsonCommentHandling.Skip,
-        AllowTrailingCommas = true
-    };
+    private readonly JsonSerializerOptions _options = CreateOptions();
 
     public JsonOptimizationCatalog(string directory)
     {
@@ -40,6 +37,17 @@ public sealed class JsonOptimizationCatalog
         }
 
         return definitions;
+    }
+
+    private static JsonSerializerOptions CreateOptions()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web)
+        {
+            ReadCommentHandling = JsonCommentHandling.Skip,
+            AllowTrailingCommas = true
+        };
+        options.Converters.Add(new JsonStringEnumConverter());
+        return options;
     }
 
     private static void Validate(OptimizationDefinition definition, string path)
