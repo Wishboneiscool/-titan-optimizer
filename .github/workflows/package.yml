@@ -1,0 +1,33 @@
+name: package
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Restore
+        run: dotnet restore src/TitanOptimizer.App/TitanOptimizer.App.csproj
+      - name: Build and test
+        run: dotnet test tests/TitanOptimizer.Windows.Tests/TitanOptimizer.Windows.Tests.csproj --configuration Release
+      - name: Publish
+        shell: pwsh
+        run: ./build/package.ps1
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: TitanOptimizer-win-x64
+          path: artifacts/TitanOptimizer-win-x64.zip
