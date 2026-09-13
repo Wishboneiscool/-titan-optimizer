@@ -107,6 +107,14 @@
 
                     <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,18,0,0">
                         <StackPanel>
+                            <TextBlock Text="Optimization explorer" FontSize="17" FontWeight="SemiBold" />
+                            <TextBlock Text="Only definitions loaded from the local, versioned catalog are shown." Foreground="{StaticResource SecondaryText}" Margin="0,4,0,10" />
+                            <ListBox x:Name="CatalogList" Background="Transparent" BorderThickness="0" Foreground="{StaticResource PrimaryText}" MinHeight="54" MaxHeight="150" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,18,0,0">
+                        <StackPanel>
                             <TextBlock Text="Recent verified changes" FontSize="17" FontWeight="SemiBold" />
                             <TextBlock Text="Local history only. No sensitive values are uploaded." Foreground="{StaticResource SecondaryText}" Margin="0,4,0,10" />
                             <ListBox x:Name="HistoryList" Background="Transparent" BorderThickness="0" Foreground="{StaticResource PrimaryText}" MinHeight="54" MaxHeight="150" />
