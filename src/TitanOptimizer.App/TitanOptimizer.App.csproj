@@ -4,6 +4,7 @@
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
     <AssemblyName>TitanOptimizer</AssemblyName>
     <RootNamespace>TitanOptimizer.App</RootNamespace>
   </PropertyGroup>
