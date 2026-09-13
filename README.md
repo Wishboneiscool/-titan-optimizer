@@ -6,13 +6,23 @@ Evidence-driven Windows performance optimization with measurement, safe change a
 
 ## Current status
 
-**Phase 1 foundation plus functional desktop shell**
+**Working MVP foundation — Phase 1 through initial diagnostics**
 
-The repository now contains a Windows desktop app that can scan installed power plans, preview a selected change, perform a user-confirmed apply, verify the resulting state, record the change in SQLite, and roll back the last change.
+The repository contains a Windows desktop app that can:
 
-```text
-Detect → Validate → Preview → Confirm → Apply → Verify → Record → Roll back
-```
+- Scan basic system inventory: Windows version, logical processors, memory, and readable storage volumes.
+- Inventory supported startup locations in read-only mode.
+- Enumerate installed power plans.
+- Preview a selected power-plan change.
+- Require explicit confirmation before applying it.
+- Verify the resulting state.
+- Restore the prior power plan, including rollback context recovered from local history after restart.
+- Persist change history and benchmark samples in SQLite.
+- Run a deterministic local workload without claiming it represents gaming performance.
+- Compare repeated benchmark samples using a variance-aware analyzer.
+- Load versioned JSON optimization definitions and profiles.
+- Enforce catalog, risk, reversibility, administrator, and confirmation gates.
+- Publish a self-contained Windows x64 package through GitHub Actions.
 
 The power-plan operation is intentionally classified as **Tier 2 — Context-dependent**. It does not promise better FPS, lower latency, or higher benchmark scores merely because a power plan changed.
 
@@ -27,52 +37,63 @@ The power-plan operation is intentionally classified as **Tier 2 — Context-dep
 - Change history is stored locally in SQLite.
 - Unsupported platforms fail closed.
 - Experimental and questionable optimizations are never automatic defaults.
+- The desktop app uses an `asInvoker` manifest and does not silently elevate.
 
 ## Technology
 
 - C# / .NET 8
 - WPF desktop shell
 - SQLite persistence through Microsoft.Data.Sqlite
+- JSON catalog and profiles
 - xUnit tests
 - GitHub Actions on Windows runners
+- Self-contained `win-x64` publish script
 
 ## Repository layout
 
 ```text
 src/
   TitanOptimizer.App/        Functional WPF desktop shell
-  TitanOptimizer.Core/       Shared contracts and optimization metadata
-  TitanOptimizer.Persistence/SQLite change journal
+  TitanOptimizer.Core/       Shared contracts, diagnostics, safety, and benchmarking
+  TitanOptimizer.Persistence/SQLite journals and JSON stores
   TitanOptimizer.Windows/    Windows-specific adapters
 
+data/
+  optimizations/             Versioned optimization definitions
+  profiles/                  Built-in safe profile
+
 tests/
+  TitanOptimizer.Core.Tests/
+  TitanOptimizer.Persistence.Tests/
   TitanOptimizer.Windows.Tests/
 
 docs/
   architecture.md
   optimization-policy.md
+  profiles.md
+  release.md
 
-.github/workflows/
-  build.yml
+build/
+  package.ps1
 ```
 
 ## First working slice
 
-The app's first real optimization is a user-selected active power-plan change. It is useful as a safety-pipeline slice because the active GUID is detectable, the target must already exist, the original value is a clear rollback value, and the result can be verified by reading the active plan again.
+The first real optimization is a user-selected active power-plan change. It is useful as a safety-pipeline slice because the active GUID is detectable, the target must already exist, the original value is a clear rollback value, and the result can be verified by reading the active plan again.
 
 The app does not automatically choose a power plan and does not claim that High performance is universally better.
 
 ## Roadmap
 
-1. Functional power-plan desktop workflow — implemented
-2. Persistent snapshots and richer audit records — next
-3. Privileged broker and administrator detection
-4. Benchmark association and variance reporting
-5. Optimization definition loading and conflict resolution
-6. Profiles and settings
-7. Diagnostics and system inventory
+1. Working desktop shell, safety pipeline, diagnostics, persistence, and initial benchmark — implemented
+2. Privileged broker for operations that require elevation
+3. Richer benchmark sessions with baseline/after labeling in the UI
+4. Recommendation engine with bottleneck-aware applicability rules
+5. Read-only service, network, driver, GPU, and thermal diagnostics
+6. Safe startup action workflow with per-item backup and rollback
+7. Profiles and settings editor
 8. Additional evidence-backed optimization primitives
-9. Packaging, signing, installation, and release QA
+9. Code signing, installer, clean-install testing, and release QA
 
 ## Explicit non-goals
 
