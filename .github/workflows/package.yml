@@ -19,10 +19,14 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-      - name: Restore
+      - name: Restore desktop app
         run: dotnet restore src/TitanOptimizer.App/TitanOptimizer.App.csproj
-      - name: Build and test
+      - name: Run core tests
+        run: dotnet test tests/TitanOptimizer.Core.Tests/TitanOptimizer.Core.Tests.csproj --configuration Release
+      - name: Run Windows adapter tests
         run: dotnet test tests/TitanOptimizer.Windows.Tests/TitanOptimizer.Windows.Tests.csproj --configuration Release
+      - name: Build desktop app
+        run: dotnet build src/TitanOptimizer.App/TitanOptimizer.App.csproj --configuration Release --no-restore
       - name: Publish
         shell: pwsh
         run: ./build/package.ps1
