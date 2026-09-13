@@ -1,0 +1,21 @@
+{
+  "id": "power-plan.active",
+  "name": "Select an installed Windows power plan",
+  "category": "Power management",
+  "subsystem": "Windows power plans",
+  "description": "Review and, only after explicit confirmation, select one of the power plans already installed on the machine.",
+  "risk": "Low",
+  "tier": "ContextDependent",
+  "requiresAdministrator": false,
+  "reversible": true,
+  "backupRequired": false,
+  "evidenceSummary": "Power-plan behavior is hardware, firmware, workload, and battery-policy dependent. No universal performance benefit is assumed.",
+  "expectedBenefit": "Context-dependent; must be measured",
+  "benchmarkRelevance": "Compare a repeatable workload before and after, with variance reported",
+  "implementationMethod": "powercfg.exe /setactive against a detected GUID",
+  "verificationProcedure": "Read the active plan and compare its GUID with the requested target",
+  "rollbackProcedure": "Restore the captured original active-plan GUID",
+  "prerequisites": ["The target plan exists on the machine"],
+  "dependencies": [],
+  "conflicts": []
+}

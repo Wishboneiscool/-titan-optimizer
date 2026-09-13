@@ -12,4 +12,7 @@
     <ProjectReference Include="..\TitanOptimizer.Persistence\TitanOptimizer.Persistence.csproj" />
     <ProjectReference Include="..\TitanOptimizer.Windows\TitanOptimizer.Windows.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\data\**" LinkBase="data" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

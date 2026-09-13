@@ -30,6 +30,11 @@ public sealed record OptimizationDefinition
     public required bool Reversible { get; init; }
     public required bool BackupRequired { get; init; }
     public required string EvidenceSummary { get; init; }
+    public string ExpectedBenefit { get; init; } = "Not established";
+    public string BenchmarkRelevance { get; init; } = "None";
+    public string ImplementationMethod { get; init; } = "Not implemented";
+    public string VerificationProcedure { get; init; } = "Read back and compare state";
+    public string RollbackProcedure { get; init; } = "Restore the captured before state";
     public string[] Prerequisites { get; init; } = [];
     public string[] Dependencies { get; init; } = [];
     public string[] Conflicts { get; init; } = [];
