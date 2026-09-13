@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>TitanOptimizer.Windows</AssemblyName>
+    <RootNamespace>TitanOptimizer.Windows</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TitanOptimizer.Core\TitanOptimizer.Core.csproj" />
+  </ItemGroup>
+</Project>

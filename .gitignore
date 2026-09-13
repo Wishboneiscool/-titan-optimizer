@@ -1,0 +1,28 @@
+## Build output
+bin/
+obj/
+.artifacts/
+
+## IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+## Test and local data
+TestResults/
+coverage/
+*.db
+*.db-shm
+*.db-wal
+
+## Packaging
+*.msix
+*.msixbundle
+*.appinstaller
+*.exe
+
+## OS
+.DS_Store
+Thumbs.db

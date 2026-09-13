@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>TitanOptimizer.Core</AssemblyName>
+    <RootNamespace>TitanOptimizer.Core</RootNamespace>
+  </PropertyGroup>
+</Project>
